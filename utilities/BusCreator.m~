@@ -92,7 +92,7 @@ elems(a).Complexity = 'real';
 
 a = a+1;
 elems(a) = Simulink.BusElement;
-elems(a).Name = 'V_air';
+elems(a).Name = 'v_air';
 elems(a).Dimensions = 3;
 elems(a).DimensionsMode = 'Fixed';
 elems(a).DataType = 'double';
@@ -101,7 +101,7 @@ elems(a).Complexity = 'real';
 
 a = a+1;
 elems(a) = Simulink.BusElement;
-elems(a).Name = 'V_air_norm';
+elems(a).Name = 'v_air_mol';
 elems(a).Dimensions = 1;
 elems(a).DimensionsMode = 'Fixed';
 elems(a).DataType = 'double';
@@ -176,80 +176,80 @@ elems(a).SampleTime = -1;
 elems(a).Complexity = 'real';
 
 ControlSurfaceInDegree = Simulink.Bus;
-ControlSurfaceInDegree.Elements = elems;
+AerodynamiControlSurfaceInDegreecsData.Elements = elems;
 %% AerodynamicsDataInput
-% clear elems;
-% a = 1;
-% elems(a) = Simulink.BusElement;
-% elems(a).Name = 'd_ea_l';
-% elems(a).Dimensions = 1;
-% elems(a).DimensionsMode = 'Fixed';
-% elems(a).DataType = 'double';
-% elems(a).SampleTime = -1;
-% elems(a).Complexity = 'real';
-% 
-% a = a+1;
-% elems(a) = Simulink.BusElement;
-% elems(a).Name = 'd_ea_r';
-% elems(a).Dimensions = 1;
-% elems(a).DimensionsMode = 'Fixed';
-% elems(a).DataType = 'double';
-% elems(a).SampleTime = -1;
-% elems(a).Complexity = 'real';
-% 
-% a = a+1;
-% elems(a) = Simulink.BusElement;
-% elems(a).Name = 'd_ca_l';
-% elems(a).Dimensions = 1;
-% elems(a).DimensionsMode = 'Fixed';
-% elems(a).DataType = 'double';
-% elems(a).SampleTime = -1;
-% elems(a).Complexity = 'real';
-% 
-% a = a+1;
-% elems(a) = Simulink.BusElement;
-% elems(a).Name = 'd_ca_r';
-% elems(a).Dimensions = 1;
-% elems(a).DimensionsMode = 'Fixed';
-% elems(a).DataType = 'double';
-% elems(a).SampleTime = -1;
-% elems(a).Complexity = 'real';
-% 
-% a = a+1;
-% elems(a) = Simulink.BusElement;
-% elems(a).Name = 'd_r_l';
-% elems(a).Dimensions = 1;
-% elems(a).DimensionsMode = 'Fixed';
-% elems(a).DataType = 'double';
-% elems(a).SampleTime = -1;
-% elems(a).Complexity = 'real';
-% 
-% a = a+1;
-% elems(a) = Simulink.BusElement;
-% elems(a).Name = 'd_r_r';
-% elems(a).Dimensions = 1;
-% elems(a).DimensionsMode = 'Fixed';
-% elems(a).DataType = 'double';
-% elems(a).SampleTime = -1;
-% elems(a).Complexity = 'real';
-% 
-% a = a+1;
-% elems(a) = Simulink.BusElement;
-% elems(a).Name = 'alpha';
-% elems(a).Dimensions = 1;
-% elems(a).DimensionsMode = 'Fixed';
-% elems(a).DataType = 'double';
-% elems(a).SampleTime = -1;
-% elems(a).Complexity = 'real';
-% 
-% a = a+1;
-% elems(a) = Simulink.BusElement;
-% elems(a).Name = 'beta';
-% elems(a).Dimensions = 1;
-% elems(a).DimensionsMode = 'Fixed';
-% elems(a).DataType = 'double';
-% elems(a).SampleTime = -1;
-% elems(a).Complexity = 'real';
-% 
-% AerodynamicsData = Simulink.Bus;
-% AerodynamicsData.Elements = elems;
+clear elems;
+a = 1;
+elems(a) = Simulink.BusElement;
+elems(a).Name = 'd_ea_l';
+elems(a).Dimensions = 1;
+elems(a).DimensionsMode = 'Fixed';
+elems(a).DataType = 'double';
+elems(a).SampleTime = -1;
+elems(a).Complexity = 'real';
+
+a = a+1;
+elems(a) = Simulink.BusElement;
+elems(a).Name = 'd_ea_r';
+elems(a).Dimensions = 1;
+elems(a).DimensionsMode = 'Fixed';
+elems(a).DataType = 'double';
+elems(a).SampleTime = -1;
+elems(a).Complexity = 'real';
+
+a = a+1;
+elems(a) = Simulink.BusElement;
+elems(a).Name = 'd_ca_l';
+elems(a).Dimensions = 1;
+elems(a).DimensionsMode = 'Fixed';
+elems(a).DataType = 'double';
+elems(a).SampleTime = -1;
+elems(a).Complexity = 'real';
+
+a = a+1;
+elems(a) = Simulink.BusElement;
+elems(a).Name = 'd_ca_r';
+elems(a).Dimensions = 1;
+elems(a).DimensionsMode = 'Fixed';
+elems(a).DataType = 'double';
+elems(a).SampleTime = -1;
+elems(a).Complexity = 'real';
+
+a = a+1;
+elems(a) = Simulink.BusElement;
+elems(a).Name = 'd_r_l';
+elems(a).Dimensions = 1;
+elems(a).DimensionsMode = 'Fixed';
+elems(a).DataType = 'double';
+elems(a).SampleTime = -1;
+elems(a).Complexity = 'real';
+
+a = a+1;
+elems(a) = Simulink.BusElement;
+elems(a).Name = 'd_r_r';
+elems(a).Dimensions = 1;
+elems(a).DimensionsMode = 'Fixed';
+elems(a).DataType = 'double';
+elems(a).SampleTime = -1;
+elems(a).Complexity = 'real';
+
+a = a+1;
+elems(a) = Simulink.BusElement;
+elems(a).Name = 'alpha';
+elems(a).Dimensions = 1;
+elems(a).DimensionsMode = 'Fixed';
+elems(a).DataType = 'double';
+elems(a).SampleTime = -1;
+elems(a).Complexity = 'real';
+
+a = a+1;
+elems(a) = Simulink.BusElement;
+elems(a).Name = 'beta';
+elems(a).Dimensions = 1;
+elems(a).DimensionsMode = 'Fixed';
+elems(a).DataType = 'double';
+elems(a).SampleTime = -1;
+elems(a).Complexity = 'real';
+
+AerodynamicsData = Simulink.Bus;
+AerodynamicsData.Elements = elems;

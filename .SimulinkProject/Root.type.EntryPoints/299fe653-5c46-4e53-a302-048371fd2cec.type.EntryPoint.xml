@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Info Type="StartUp" Visible="0" Icon="" File="utilities/ReadQGCPlan.m" Name="ReadQGCPlan">
+    <Extension Value="cc5bf93a-add6-4b33-8b77-e8476f5f7f27" Name="StartUpPrev" />
+</Info>
