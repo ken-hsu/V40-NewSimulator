@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'kalman_airspeed'.
 //
-// Model version                  : 1.49
+// Model version                  : 1.56
 // Simulink Coder version         : 8.13 (R2017b) 24-Jul-2017
-// C/C++ source code generated on : Thu Mar 19 11:39:42 2020
+// C/C++ source code generated on : Mon May 11 09:28:48 2020
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex
@@ -34,11 +34,12 @@
 
 // Block signals and states (auto storage) for system '<Root>'
 typedef struct {
+  real32_T x_hat_new[9];               // '<S6>/airspeedSynthetic_heightCalibrateRPSAndModelVarianceVarient' 
   real32_T PDelay_DSTATE[81];          // '<S1>/P Delay'
   real32_T XDelay1_DSTATE[9];          // '<S1>/X Delay1'
   real32_T Delay2_DSTATE;              // '<S1>/Delay2'
-  uint8_T is_active_c1_AirspeedSyntheticI;// '<S1>/Chart'
-  uint8_T is_c1_AirspeedSyntheticImprove;// '<S1>/Chart'
+  uint8_T is_active_c2_AirspeedSyntheticI;// '<S1>/Chart'
+  uint8_T is_c2_AirspeedSyntheticImprove;// '<S1>/Chart'
   boolean_T InitParam;                 // '<S1>/Chart'
   boolean_T PauseKalman;               // '<S1>/Chart'
   boolean_T Subsystem_MODE;            // '<S1>/Subsystem'
@@ -82,6 +83,10 @@ typedef struct {
   real32_T actuatorControlThrust;      // '<Root>/actuatorControlThrust'
   real32_T covR[2];                    // '<Root>/covR'
   int8_T version;                      // '<Root>/version'
+  boolean_T arm;                       // '<Root>/arm'
+  real32_T weight;                     // '<Root>/weight'
+  real32_T MaxRPS;                     // '<Root>/MaxRPS'
+  real32_T yawRad;                     // '<Root>/yawRad'
 } ExtU_kalman_airspeed_T;
 
 // External outputs (root outports fed by signals with auto storage)
@@ -145,11 +150,13 @@ class kalman_airspeedModelClass {
 //  Here is the system hierarchy for this model
 //
 //  '<Root>' : 'kalman_airspeed'
-//  '<S1>'   : 'kalman_airspeed/ASS_SF'
-//  '<S2>'   : 'kalman_airspeed/ASS_SF/Chart'
-//  '<S3>'   : 'kalman_airspeed/ASS_SF/IAS_calculate'
-//  '<S4>'   : 'kalman_airspeed/ASS_SF/Subsystem'
-//  '<S5>'   : 'kalman_airspeed/ASS_SF/Subsystem/FunctionOfModule'
+//  '<S1>'   : 'kalman_airspeed/ASS_HeightWeightAdjust'
+//  '<S2>'   : 'kalman_airspeed/ASS_HeightWeightAdjust/Chart'
+//  '<S3>'   : 'kalman_airspeed/ASS_HeightWeightAdjust/Compare To Constant'
+//  '<S4>'   : 'kalman_airspeed/ASS_HeightWeightAdjust/Compare To Constant1'
+//  '<S5>'   : 'kalman_airspeed/ASS_HeightWeightAdjust/IAS_calculate'
+//  '<S6>'   : 'kalman_airspeed/ASS_HeightWeightAdjust/Subsystem'
+//  '<S7>'   : 'kalman_airspeed/ASS_HeightWeightAdjust/Subsystem/airspeedSynthetic_heightCalibrateRPSAndModelVarianceVarient'
 
 
 //-

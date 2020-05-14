@@ -19,12 +19,12 @@
 %function GlobalMachineInitializer(block) void
   %openfile tmpFcnBuf
   %<DumpMachineInitializer(block)>\
-  %if FILE_EXISTS("AirspeedSyntheticImprove_rtw.tlc")
-    %generatefile "machineSource" "AirspeedSyntheticImprove_rtw.tlc"
-    %<GENERATE_TYPE(block,"DumpMachineInitializer","machineSource")>\
-  %endif
   %if FILE_EXISTS("WindEstimator_rtw.tlc")
     %generatefile "machineSource" "WindEstimator_rtw.tlc"
+    %<GENERATE_TYPE(block,"DumpMachineInitializer","machineSource")>\
+  %endif
+  %if FILE_EXISTS("AirspeedSyntheticImprove_rtw.tlc")
+    %generatefile "machineSource" "AirspeedSyntheticImprove_rtw.tlc"
     %<GENERATE_TYPE(block,"DumpMachineInitializer","machineSource")>\
   %endif
   %closefile tmpFcnBuf
@@ -44,9 +44,9 @@
 %function GlobalMachineTerminator(block) void
   %openfile tmpFcnBuf
   %<DumpMachineTerminator(block)>\
-  %generatefile "machineSource" "AirspeedSyntheticImprove_rtw.tlc"
-  %<GENERATE_TYPE(block,"DumpMachineTerminator","machineSource")>\
   %generatefile "machineSource" "WindEstimator_rtw.tlc"
+  %<GENERATE_TYPE(block,"DumpMachineTerminator","machineSource")>\
+  %generatefile "machineSource" "AirspeedSyntheticImprove_rtw.tlc"
   %<GENERATE_TYPE(block,"DumpMachineTerminator","machineSource")>\
   %closefile tmpFcnBuf
   %return tmpFcnBuf              

@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'kalman_airspeed'.
 //
-// Model version                  : 1.49
+// Model version                  : 1.56
 // Simulink Coder version         : 8.13 (R2017b) 24-Jul-2017
-// C/C++ source code generated on : Thu Mar 19 11:39:42 2020
+// C/C++ source code generated on : Mon May 11 09:28:48 2020
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex
@@ -33,7 +33,7 @@ void kalman_airspeedModelClass::kalman_airspeed_stateDetermine(boolean_T
 {
   boolean_T aVarTruthTableCondition_4;
   boolean_T aVarTruthTableCondition_5;
-  aVarTruthTableCondition_4 = ((IAS_hatTB > 0.0F) && (IAS_hatTB < 50.0F));
+  aVarTruthTableCondition_4 = ((IAS_hatTB > -80.0F) && (IAS_hatTB < 80.0F));
   aVarTruthTableCondition_5 = (hkTB > 0.0F);
   if ((!aVarTruthTableCondition_4) && (!aVarTruthTableCondition_5)) {
     *InitParamTB = true;
@@ -69,8 +69,8 @@ void kalman_airspeedModelClass::step()
 {
   real_T S_ref;
   real_T CD_mean;
+  real32_T RPS;
   real32_T V_rb[3];
-  real32_T V_a;
   real32_T Vbar_rb[3];
   real32_T Vbar_a;
   real32_T L_u;
@@ -99,14 +99,12 @@ void kalman_airspeedModelClass::step()
 
   static const int8_T h[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 1 };
 
-  real32_T rtb_Delay2;
   real32_T rtb_UnitConversion;
   int32_T i;
   real32_T tmp[3];
-  int32_T i_0;
   real32_T F_0[81];
-  real_T cToRps_idx_0;
-  real_T cToRps_idx_1;
+  real_T f1_idx_4;
+  real_T f1_idx_5;
   real_T f1_idx_6;
   real_T f1_idx_7;
   real_T h1_idx_1;
@@ -114,59 +112,69 @@ void kalman_airspeedModelClass::step()
   real_T Thrust_coe_idx_1;
   real_T h1_idx_10;
   real_T Thrust_coe_idx_0;
-  real32_T x_hat_idx_2_tmp;
-  real32_T h1_idx_1_tmp;
-  real32_T h1_idx_1_tmp_0;
-  real32_T h1_idx_1_tmp_1;
+  real32_T Q_tmp;
+  real32_T Q_tmp_0;
+  real32_T Q_tmp_1;
+  real32_T Q_tmp_tmp;
   real32_T h1_idx_5_tmp;
   int32_T P_hat_tmp;
   int32_T Kgain_tmp;
 
-  // Delay: '<S1>/Delay2'
-  rtb_Delay2 = kalman_airspeed_DW.Delay2_DSTATE;
-
   // Chart: '<S1>/Chart' incorporates:
+  //   Inport: '<Root>/TransitionToFw'
+  //   Inport: '<Root>/arm'
+  //   Inport: '<Root>/isT'
   //   Inport: '<Root>/uORB'
 
-  if (((uint32_T)kalman_airspeed_DW.is_active_c1_AirspeedSyntheticI) == 0U) {
-    kalman_airspeed_DW.is_active_c1_AirspeedSyntheticI = 1U;
-    kalman_airspeed_DW.is_c1_AirspeedSyntheticImprove =
+  if (((uint32_T)kalman_airspeed_DW.is_active_c2_AirspeedSyntheticI) == 0U) {
+    kalman_airspeed_DW.is_active_c2_AirspeedSyntheticI = 1U;
+    kalman_airspeed_DW.is_c2_AirspeedSyntheticImprove =
       kalman_airspeed_IN_kalman_off;
     kalman_airspeed_DW.InitParam = true;
     kalman_airspeed_DW.PauseKalman = true;
 
     // Outport: '<Root>/State'
     kalman_airspeed_Y.State = 0.0F;
-  } else if (((uint32_T)kalman_airspeed_DW.is_c1_AirspeedSyntheticImprove) ==
+  } else if (((uint32_T)kalman_airspeed_DW.is_c2_AirspeedSyntheticImprove) ==
              kalman_airspeed_IN_kalman_off) {
     if ((kalman_airspeed_U.uORB[0]) && ((kalman_airspeed_U.uORB[1]) &&
          ((kalman_airspeed_U.uORB[2]) && ((kalman_airspeed_U.uORB[3]) &&
-           (kalman_airspeed_U.uORB[4]))))) {
-      kalman_airspeed_DW.is_c1_AirspeedSyntheticImprove =
+           ((kalman_airspeed_U.uORB[4]) && (((kalman_airspeed_U.arm) &&
+              (kalman_airspeed_U.isT)) && (kalman_airspeed_U.TransitionToFw)))))))
+    {
+      kalman_airspeed_DW.is_c2_AirspeedSyntheticImprove =
         kalman_airspeed_IN_kalman_on;
 
       // Outport: '<Root>/State' incorporates:
-      //   Inport: '<Root>/TransitionToFw'
+      //   Delay: '<S1>/Delay2'
       //   Inport: '<Root>/hk'
       //   Inport: '<Root>/isR'
-      //   Inport: '<Root>/isT'
 
       kalman_airspeed_stateDetermine(kalman_airspeed_U.isR,
-        kalman_airspeed_U.TransitionToFw, rtb_Delay2, kalman_airspeed_U.hk,
-        &kalman_airspeed_DW.InitParam, &kalman_airspeed_DW.PauseKalman,
-        &kalman_airspeed_Y.State);
+        kalman_airspeed_U.TransitionToFw, kalman_airspeed_DW.Delay2_DSTATE,
+        kalman_airspeed_U.hk, &kalman_airspeed_DW.InitParam,
+        &kalman_airspeed_DW.PauseKalman, &kalman_airspeed_Y.State);
     }
+  } else if (!kalman_airspeed_U.arm) {
+    kalman_airspeed_DW.is_c2_AirspeedSyntheticImprove =
+      kalman_airspeed_IN_kalman_off;
+    kalman_airspeed_DW.InitParam = true;
+    kalman_airspeed_DW.PauseKalman = true;
+
+    // Outport: '<Root>/State'
+    kalman_airspeed_Y.State = 0.0F;
   } else {
     // Outport: '<Root>/State' incorporates:
+    //   Delay: '<S1>/Delay2'
     //   Inport: '<Root>/TransitionToFw'
     //   Inport: '<Root>/hk'
     //   Inport: '<Root>/isR'
     //   Inport: '<Root>/isT'
 
     kalman_airspeed_stateDetermine(kalman_airspeed_U.isR,
-      kalman_airspeed_U.TransitionToFw, rtb_Delay2, kalman_airspeed_U.hk,
-      &kalman_airspeed_DW.InitParam, &kalman_airspeed_DW.PauseKalman,
-      &kalman_airspeed_Y.State);
+      kalman_airspeed_U.TransitionToFw, kalman_airspeed_DW.Delay2_DSTATE,
+      kalman_airspeed_U.hk, &kalman_airspeed_DW.InitParam,
+      &kalman_airspeed_DW.PauseKalman, &kalman_airspeed_Y.State);
   }
 
   // End of Chart: '<S1>/Chart'
@@ -201,7 +209,7 @@ void kalman_airspeedModelClass::step()
     0U;
 
   // Outputs for Enabled SubSystem: '<S1>/Subsystem' incorporates:
-  //   EnablePort: '<S4>/Enable'
+  //   EnablePort: '<S6>/Enable'
 
   // Logic: '<S1>/Logical Operator1'
   if (!kalman_airspeed_DW.PauseKalman) {
@@ -209,18 +217,19 @@ void kalman_airspeedModelClass::step()
       kalman_airspeed_DW.Subsystem_MODE = true;
     }
 
-    // UnitConversion: '<S4>/Unit Conversion' incorporates:
+    // UnitConversion: '<S6>/Unit Conversion' incorporates:
     //   Inport: '<Root>/dT'
 
     // Unit Conversion - from: us to: sec
     // Expression: output = (1e-06*input) + (0)
     rtb_UnitConversion = 1.0E-6F * kalman_airspeed_U.dT;
 
-    // MATLAB Function: '<S4>/FunctionOfModule' incorporates:
+    // MATLAB Function: '<S6>/airspeedSynthetic_heightCalibrateRPSAndModelVarianceVarient' incorporates:
     //   Delay: '<S1>/P Delay'
     //   Delay: '<S1>/X Delay1'
     //   Inport: '<Root>/Ax'
     //   Inport: '<Root>/Az'
+    //   Inport: '<Root>/MaxRPS'
     //   Inport: '<Root>/T_bn'
     //   Inport: '<Root>/V_W6'
     //   Inport: '<Root>/actuatorControlThrust'
@@ -231,151 +240,149 @@ void kalman_airspeedModelClass::step()
     //   Inport: '<Root>/v_b'
     //   Inport: '<Root>/version'
     //   Inport: '<Root>/w_b'
+    //   Inport: '<Root>/weight'
+    //   Inport: '<Root>/yawRad'
 
     switch (kalman_airspeed_U.version) {
      case 40:
-      i = 42;
       S_ref = 1.4;
       CD_mean = 0.0891;
       Thrust_coe_idx_0 = 0.0382;
-      cToRps_idx_0 = 54.9707;
       Thrust_coe_idx_1 = -0.1314;
-      cToRps_idx_1 = 53.5937;
       break;
 
      case 60:
-      i = 60;
       S_ref = 1.714;
       CD_mean = 0.09;
-      Thrust_coe_idx_0 = 0.0477;
-      cToRps_idx_0 = 33.5563;
-      Thrust_coe_idx_1 = -0.1101;
-      cToRps_idx_1 = 49.8235;
+      Thrust_coe_idx_0 = 0.0203;
+      Thrust_coe_idx_1 = -0.084;
       break;
 
      default:
-      i = 42;
       S_ref = 1.4;
       CD_mean = 0.0891;
       Thrust_coe_idx_0 = 0.0382;
-      cToRps_idx_0 = 54.9707;
       Thrust_coe_idx_1 = -0.1314;
-      cToRps_idx_1 = 53.5937;
       break;
     }
 
-    rtb_Delay2 = (kalman_airspeed_U.actuatorControlThrust * ((real32_T)
-      cToRps_idx_0)) + ((real32_T)cToRps_idx_1);
+    RPS = ((kalman_airspeed_U.actuatorControlThrust * (kalman_airspeed_U.MaxRPS /
+             2.0F)) + (kalman_airspeed_U.MaxRPS / 2.0F)) / sqrtf(1.0F -
+      ((0.0099F * kalman_airspeed_U.hk) / 100.8F));
     tmp[0] = kalman_airspeed_U.u_b;
     tmp[1] = kalman_airspeed_U.v_b;
     tmp[2] = kalman_airspeed_U.w_b;
     Vbar_a = kalman_airspeed_DW.XDelay1_DSTATE[0] +
       kalman_airspeed_DW.XDelay1_DSTATE[3];
-    V_a = kalman_airspeed_DW.XDelay1_DSTATE[1] +
+    dt2 = kalman_airspeed_DW.XDelay1_DSTATE[1] +
       kalman_airspeed_DW.XDelay1_DSTATE[4];
-    dt2 = kalman_airspeed_DW.XDelay1_DSTATE[2] +
+    L_u = kalman_airspeed_DW.XDelay1_DSTATE[2] +
       kalman_airspeed_DW.XDelay1_DSTATE[5];
-    for (i_0 = 0; i_0 < 3; i_0++) {
-      V_rb[i_0] = tmp[i_0] - (((kalman_airspeed_U.T_bn[i_0] * Vbar_a) +
-        (kalman_airspeed_U.T_bn[i_0 + 3] * V_a)) + (kalman_airspeed_U.T_bn[i_0 +
-        6] * dt2));
+    for (i = 0; i < 3; i++) {
+      V_rb[i] = tmp[i] - (((kalman_airspeed_U.T_bn[i] * Vbar_a) +
+                           (kalman_airspeed_U.T_bn[i + 3] * dt2)) +
+                          (kalman_airspeed_U.T_bn[i + 6] * L_u));
     }
 
     tmp[0] = kalman_airspeed_U.u_b;
     tmp[1] = kalman_airspeed_U.v_b;
     tmp[2] = kalman_airspeed_U.w_b;
-    for (i_0 = 0; i_0 < 3; i_0++) {
-      Vbar_rb[i_0] = tmp[i_0] - (((kalman_airspeed_U.T_bn[i_0] *
-        kalman_airspeed_DW.XDelay1_DSTATE[0]) + (kalman_airspeed_U.T_bn[i_0 + 3]
-        * kalman_airspeed_DW.XDelay1_DSTATE[1])) + (kalman_airspeed_U.T_bn[i_0 +
-        6] * kalman_airspeed_DW.XDelay1_DSTATE[2]));
+    for (i = 0; i < 3; i++) {
+      Vbar_rb[i] = tmp[i] - (((kalman_airspeed_U.T_bn[i] *
+        kalman_airspeed_DW.XDelay1_DSTATE[0]) + (kalman_airspeed_U.T_bn[i + 3] *
+        kalman_airspeed_DW.XDelay1_DSTATE[1])) + (kalman_airspeed_U.T_bn[i + 6] *
+        kalman_airspeed_DW.XDelay1_DSTATE[2]));
     }
 
     Vbar_a = sqrtf(((Vbar_rb[0] * Vbar_rb[0]) + (Vbar_rb[1] * Vbar_rb[1])) +
                    (Vbar_rb[2] * Vbar_rb[2]));
-    V_a = 0.177F + (0.000823F * kalman_airspeed_U.hk);
-    L_u = kalman_airspeed_U.hk / powf(V_a, 1.2F);
+    dt2 = 0.177F + (0.000823F * kalman_airspeed_U.hk);
+    L_u = kalman_airspeed_U.hk / powf(dt2, 1.2F);
+    sigma_u = (kalman_airspeed_U.V_W6 * 0.1F) / powf(dt2, 0.4F);
     dt2 = rtb_UnitConversion * rtb_UnitConversion;
     memset(&Q[0], 0, 81U * (sizeof(real_T)));
-    Q[0] = (real_T)((real32_T)(dt2 * 1.0E-7F));
-    Q[10] = (real_T)((real32_T)(dt2 * 1.0E-7F));
+    Q_tmp = fabsf(cosf(kalman_airspeed_U.yawRad));
+    Q[0] = (real_T)((real32_T)(dt2 * (1.0E-7F + (0.0001F * Q_tmp))));
+    Q_tmp_0 = fabsf(sinf(kalman_airspeed_U.yawRad));
+    Q[10] = (real_T)((real32_T)(dt2 * (1.0E-7F + (0.0001F * Q_tmp_0))));
     Q[20] = (real_T)((real32_T)(dt2 * 1.0E-10F));
-    sigma_u = (2.0F * rtb_UnitConversion) * sqrtf(((V_rb[0] * V_rb[0]) + (V_rb[1]
-      * V_rb[1])) + (V_rb[2] * V_rb[2]));
-    cToRps_idx_0 = (real_T)((real32_T)(((dt2 * 0.01F) * ((kalman_airspeed_U.V_W6
-      * 0.1F) / powf(V_a, 0.4F))) * sqrtf(sigma_u / L_u)));
-    Q[30] = cToRps_idx_0;
-    Q[40] = cToRps_idx_0;
+    Q_tmp_tmp = (2.0F * rtb_UnitConversion) * sqrtf(((V_rb[0] * V_rb[0]) +
+      (V_rb[1] * V_rb[1])) + (V_rb[2] * V_rb[2]));
+    Q_tmp_1 = sqrtf(Q_tmp_tmp / L_u);
+    Q[30] = (real_T)((real32_T)(((dt2 * (0.01F + (0.04F * Q_tmp))) * sigma_u) *
+      Q_tmp_1));
+    Q[40] = (real_T)((real32_T)(((dt2 * (0.01F + (0.04F * Q_tmp_0))) * sigma_u) *
+      Q_tmp_1));
     Q[50] = (real_T)((real32_T)(((dt2 * 0.02F) * (kalman_airspeed_U.V_W6 * 0.1F))
-      * sqrtf(sigma_u / kalman_airspeed_U.hk)));
+      * sqrtf(Q_tmp_tmp / kalman_airspeed_U.hk)));
     Q[60] = (real_T)((real32_T)(dt2 * 1.0E-10F));
     Q[70] = (real_T)((real32_T)(dt2 * 1.0E-8F));
     Q[80] = (real_T)((real32_T)(dt2 * 1.0E-15F));
-    V_a = (((kalman_airspeed_U.T_bn[0] * kalman_airspeed_DW.XDelay1_DSTATE[0]) -
+    dt2 = (((kalman_airspeed_U.T_bn[0] * kalman_airspeed_DW.XDelay1_DSTATE[0]) -
             kalman_airspeed_U.u_b) + (kalman_airspeed_U.T_bn[3] *
             kalman_airspeed_DW.XDelay1_DSTATE[1])) + (kalman_airspeed_U.T_bn[6] *
       kalman_airspeed_DW.XDelay1_DSTATE[2]);
-    dt2 = (((kalman_airspeed_U.T_bn[1] * kalman_airspeed_DW.XDelay1_DSTATE[0]) -
-            kalman_airspeed_U.v_b) + (kalman_airspeed_U.T_bn[4] *
-            kalman_airspeed_DW.XDelay1_DSTATE[1])) + (kalman_airspeed_U.T_bn[7] *
-      kalman_airspeed_DW.XDelay1_DSTATE[2]);
-    sigma_u = (((kalman_airspeed_U.T_bn[2] * kalman_airspeed_DW.XDelay1_DSTATE[0])
-                - kalman_airspeed_U.w_b) + (kalman_airspeed_U.T_bn[5] *
+    sigma_u = (((kalman_airspeed_U.T_bn[1] * kalman_airspeed_DW.XDelay1_DSTATE[0])
+                - kalman_airspeed_U.v_b) + (kalman_airspeed_U.T_bn[4] *
                 kalman_airspeed_DW.XDelay1_DSTATE[1])) +
-      (kalman_airspeed_U.T_bn[8] * kalman_airspeed_DW.XDelay1_DSTATE[2]);
-    cToRps_idx_0 = 1.0 / sqrt((real_T)((real32_T)(((V_a * V_a) + (dt2 * dt2)) +
-      (sigma_u * sigma_u))));
-    cToRps_idx_1 = (real_T)((real32_T)((((2.0F * kalman_airspeed_U.T_bn[6]) *
-      V_a) + ((2.0F * kalman_airspeed_U.T_bn[7]) * dt2)) + ((2.0F *
-      kalman_airspeed_U.T_bn[8]) * sigma_u)));
-    f1_idx_6 = (real_T)((real32_T)((((2.0F * kalman_airspeed_U.T_bn[3]) * V_a) +
-      ((2.0F * kalman_airspeed_U.T_bn[4]) * dt2)) + ((2.0F *
-      kalman_airspeed_U.T_bn[5]) * sigma_u)));
-    f1_idx_7 = (real_T)((real32_T)((((2.0F * kalman_airspeed_U.T_bn[0]) * V_a) +
-      ((2.0F * kalman_airspeed_U.T_bn[1]) * dt2)) + ((2.0F *
-      kalman_airspeed_U.T_bn[2]) * sigma_u)));
-    V_a = (rtb_UnitConversion * kalman_airspeed_DW.XDelay1_DSTATE[3]) *
-      ((real32_T)cToRps_idx_0);
-    F[3] = (-(V_a * ((real32_T)f1_idx_7))) / (2.0F * L_u);
-    F[12] = (-(V_a * ((real32_T)f1_idx_6))) / (2.0F * L_u);
-    F[21] = (-(V_a * ((real32_T)cToRps_idx_1))) / (2.0F * L_u);
-    V_a = 1.0F - (rtb_UnitConversion / (L_u * ((real32_T)cToRps_idx_0)));
-    F[30] = V_a;
+      (kalman_airspeed_U.T_bn[7] * kalman_airspeed_DW.XDelay1_DSTATE[2]);
+    Q_tmp = (((kalman_airspeed_U.T_bn[2] * kalman_airspeed_DW.XDelay1_DSTATE[0])
+              - kalman_airspeed_U.w_b) + (kalman_airspeed_U.T_bn[5] *
+              kalman_airspeed_DW.XDelay1_DSTATE[1])) + (kalman_airspeed_U.T_bn[8]
+      * kalman_airspeed_DW.XDelay1_DSTATE[2]);
+    f1_idx_4 = 1.0 / sqrt((real_T)((real32_T)(((dt2 * dt2) + (sigma_u * sigma_u))
+      + (Q_tmp * Q_tmp))));
+    f1_idx_5 = (real_T)((real32_T)((((2.0F * kalman_airspeed_U.T_bn[6]) * dt2) +
+      ((2.0F * kalman_airspeed_U.T_bn[7]) * sigma_u)) + ((2.0F *
+      kalman_airspeed_U.T_bn[8]) * Q_tmp)));
+    f1_idx_6 = (real_T)((real32_T)((((2.0F * kalman_airspeed_U.T_bn[3]) * dt2) +
+      ((2.0F * kalman_airspeed_U.T_bn[4]) * sigma_u)) + ((2.0F *
+      kalman_airspeed_U.T_bn[5]) * Q_tmp)));
+    f1_idx_7 = (real_T)((real32_T)((((2.0F * kalman_airspeed_U.T_bn[0]) * dt2) +
+      ((2.0F * kalman_airspeed_U.T_bn[1]) * sigma_u)) + ((2.0F *
+      kalman_airspeed_U.T_bn[2]) * Q_tmp)));
+    dt2 = (rtb_UnitConversion * kalman_airspeed_DW.XDelay1_DSTATE[3]) *
+      ((real32_T)f1_idx_4);
+    F[3] = (-(dt2 * ((real32_T)f1_idx_7))) / (2.0F * L_u);
+    F[12] = (-(dt2 * ((real32_T)f1_idx_6))) / (2.0F * L_u);
+    F[21] = (-(dt2 * ((real32_T)f1_idx_5))) / (2.0F * L_u);
+    dt2 = 1.0F - (rtb_UnitConversion / (L_u * ((real32_T)f1_idx_4)));
+    F[30] = dt2;
     F[39] = 0.0F;
     F[48] = 0.0F;
     F[57] = 0.0F;
     F[66] = 0.0F;
     F[75] = 0.0F;
-    dt2 = (rtb_UnitConversion * kalman_airspeed_DW.XDelay1_DSTATE[4]) *
-      ((real32_T)cToRps_idx_0);
-    F[4] = (-(dt2 * ((real32_T)f1_idx_7))) / (2.0F * L_u);
-    F[13] = (-(dt2 * ((real32_T)f1_idx_6))) / (2.0F * L_u);
-    F[22] = (-(dt2 * ((real32_T)cToRps_idx_1))) / (2.0F * L_u);
+    sigma_u = (rtb_UnitConversion * kalman_airspeed_DW.XDelay1_DSTATE[4]) *
+      ((real32_T)f1_idx_4);
+    F[4] = (-(sigma_u * ((real32_T)f1_idx_7))) / (2.0F * L_u);
+    F[13] = (-(sigma_u * ((real32_T)f1_idx_6))) / (2.0F * L_u);
+    F[22] = (-(sigma_u * ((real32_T)f1_idx_5))) / (2.0F * L_u);
     F[31] = 0.0F;
-    F[40] = V_a;
+    F[40] = dt2;
     F[49] = 0.0F;
     F[58] = 0.0F;
     F[67] = 0.0F;
     F[76] = 0.0F;
-    V_a = (rtb_UnitConversion * kalman_airspeed_DW.XDelay1_DSTATE[5]) *
-      ((real32_T)cToRps_idx_0);
-    F[5] = (-(V_a * ((real32_T)f1_idx_7))) / (2.0F * kalman_airspeed_U.hk);
-    F[14] = (-(V_a * ((real32_T)f1_idx_6))) / (2.0F * kalman_airspeed_U.hk);
-    F[23] = (-(V_a * ((real32_T)cToRps_idx_1))) / (2.0F * kalman_airspeed_U.hk);
+    dt2 = (rtb_UnitConversion * kalman_airspeed_DW.XDelay1_DSTATE[5]) *
+      ((real32_T)f1_idx_4);
+    F[5] = (-(dt2 * ((real32_T)f1_idx_7))) / (2.0F * kalman_airspeed_U.hk);
+    F[14] = (-(dt2 * ((real32_T)f1_idx_6))) / (2.0F * kalman_airspeed_U.hk);
+    F[23] = (-(dt2 * ((real32_T)f1_idx_5))) / (2.0F * kalman_airspeed_U.hk);
     F[32] = 0.0F;
     F[41] = 0.0F;
     F[50] = 1.0F - (rtb_UnitConversion / (kalman_airspeed_U.hk * ((real32_T)
-      cToRps_idx_0)));
+      f1_idx_4)));
     F[59] = 0.0F;
     F[68] = 0.0F;
     F[77] = 0.0F;
-    for (i_0 = 0; i_0 < 9; i_0++) {
-      F[9 * i_0] = (real32_T)c[i_0];
-      F[1 + (9 * i_0)] = (real32_T)d[i_0];
-      F[2 + (9 * i_0)] = (real32_T)e[i_0];
-      F[6 + (9 * i_0)] = (real32_T)f[i_0];
-      F[7 + (9 * i_0)] = (real32_T)g[i_0];
-      F[8 + (9 * i_0)] = (real32_T)h[i_0];
+    for (i = 0; i < 9; i++) {
+      F[9 * i] = (real32_T)c[i];
+      F[1 + (9 * i)] = (real32_T)d[i];
+      F[2 + (9 * i)] = (real32_T)e[i];
+      F[6 + (9 * i)] = (real32_T)f[i];
+      F[7 + (9 * i)] = (real32_T)g[i];
+      F[8 + (9 * i)] = (real32_T)h[i];
     }
 
     x_hat[0] = kalman_airspeed_DW.XDelay1_DSTATE[0];
@@ -398,21 +405,21 @@ void kalman_airspeedModelClass::step()
     tmp[2] = kalman_airspeed_U.w_b;
     L_u = kalman_airspeed_DW.XDelay1_DSTATE[0] + x_hat[3];
     sigma_u = kalman_airspeed_DW.XDelay1_DSTATE[1] + x_hat[4];
-    x_hat_idx_2_tmp = kalman_airspeed_DW.XDelay1_DSTATE[2] + x_hat[5];
-    for (i_0 = 0; i_0 < 3; i_0++) {
-      V_rb[i_0] = tmp[i_0] - (((kalman_airspeed_U.T_bn[i_0] * L_u) +
-        (kalman_airspeed_U.T_bn[i_0 + 3] * sigma_u)) +
-        (kalman_airspeed_U.T_bn[i_0 + 6] * x_hat_idx_2_tmp));
+    Q_tmp = kalman_airspeed_DW.XDelay1_DSTATE[2] + x_hat[5];
+    for (i = 0; i < 3; i++) {
+      V_rb[i] = tmp[i] - (((kalman_airspeed_U.T_bn[i] * L_u) +
+                           (kalman_airspeed_U.T_bn[i + 3] * sigma_u)) +
+                          (kalman_airspeed_U.T_bn[i + 6] * Q_tmp));
     }
 
-    V_a = sqrtf(((V_rb[0] * V_rb[0]) + (V_rb[1] * V_rb[1])) + (V_rb[2] * V_rb[2]));
+    dt2 = sqrtf(((V_rb[0] * V_rb[0]) + (V_rb[1] * V_rb[1])) + (V_rb[2] * V_rb[2]));
     tmp[0] = kalman_airspeed_U.u_b;
     tmp[1] = kalman_airspeed_U.v_b;
     tmp[2] = kalman_airspeed_U.w_b;
-    for (i_0 = 0; i_0 < 3; i_0++) {
-      Vbar_rb[i_0] = tmp[i_0] - (((kalman_airspeed_U.T_bn[i_0] *
-        kalman_airspeed_DW.XDelay1_DSTATE[0]) + (kalman_airspeed_U.T_bn[i_0 + 3]
-        * x_hat[1])) + (kalman_airspeed_U.T_bn[i_0 + 6] * x_hat[2]));
+    for (i = 0; i < 3; i++) {
+      Vbar_rb[i] = tmp[i] - (((kalman_airspeed_U.T_bn[i] *
+        kalman_airspeed_DW.XDelay1_DSTATE[0]) + (kalman_airspeed_U.T_bn[i + 3] *
+        x_hat[1])) + (kalman_airspeed_U.T_bn[i + 6] * x_hat[2]));
     }
 
     Vbar_a = sqrtf(((Vbar_rb[0] * Vbar_rb[0]) + (Vbar_rb[1] * Vbar_rb[1])) +
@@ -421,68 +428,65 @@ void kalman_airspeedModelClass::step()
     R[2] = 0.0;
     R[0] = (real_T)kalman_airspeed_U.covR[0];
     R[3] = (real_T)kalman_airspeed_U.covR[1];
-    dt2 = 2.0F * ((real32_T)i);
-    rtb_UnitConversion = (kalman_airspeed_U.rho * ((real32_T)S_ref)) / dt2;
+    rtb_UnitConversion = (kalman_airspeed_U.rho * ((real32_T)S_ref)) / (2.0F *
+      kalman_airspeed_U.weight);
     f1_idx_7 = (real_T)((real32_T)((((kalman_airspeed_U.T_bn[0] * L_u) -
       kalman_airspeed_U.u_b) + (kalman_airspeed_U.T_bn[3] * sigma_u)) +
-      (kalman_airspeed_U.T_bn[6] * x_hat_idx_2_tmp)));
-    h1_idx_1_tmp = kalman_airspeed_U.T_bn[2] * L_u;
-    h1_idx_1_tmp_0 = kalman_airspeed_U.T_bn[5] * sigma_u;
-    h1_idx_1_tmp_1 = kalman_airspeed_U.T_bn[8] * x_hat_idx_2_tmp;
-    h1_idx_1 = (real_T)((real32_T)(((h1_idx_1_tmp - kalman_airspeed_U.w_b) +
-      h1_idx_1_tmp_0) + h1_idx_1_tmp_1));
+      (kalman_airspeed_U.T_bn[6] * Q_tmp)));
+    Q_tmp_0 = kalman_airspeed_U.T_bn[2] * L_u;
+    Q_tmp_tmp = kalman_airspeed_U.T_bn[5] * sigma_u;
+    Q_tmp_1 = kalman_airspeed_U.T_bn[8] * Q_tmp;
+    h1_idx_1 = (real_T)((real32_T)(((Q_tmp_0 - kalman_airspeed_U.w_b) +
+      Q_tmp_tmp) + Q_tmp_1));
     h1_idx_2 = (real_T)((real32_T)((((kalman_airspeed_U.T_bn[1] * L_u) -
       kalman_airspeed_U.v_b) + (kalman_airspeed_U.T_bn[4] * sigma_u)) +
-      (kalman_airspeed_U.T_bn[7] * x_hat_idx_2_tmp)));
-    L_u = atan2f(((kalman_airspeed_U.w_b - h1_idx_1_tmp) - h1_idx_1_tmp_0) -
-                 h1_idx_1_tmp_1, (real32_T)((real_T)(-f1_idx_7)));
-    cToRps_idx_1 = f1_idx_7 * f1_idx_7;
-    f1_idx_6 = cToRps_idx_1 + (h1_idx_1 * h1_idx_1);
-    cToRps_idx_0 = f1_idx_6 + (h1_idx_2 * h1_idx_2);
-    h1_idx_1_tmp_0 = (-rtb_UnitConversion) * (kalman_airspeed_DW.XDelay1_DSTATE
-      [6] + (((180.0F * kalman_airspeed_DW.XDelay1_DSTATE[7]) * L_u) /
-             3.14159274F));
-    h1_idx_1_tmp_1 = (((180.0F * kalman_airspeed_DW.XDelay1_DSTATE[7]) *
-                       rtb_UnitConversion) * ((real32_T)cToRps_idx_1)) *
-      ((real32_T)cToRps_idx_0);
+      (kalman_airspeed_U.T_bn[7] * Q_tmp)));
+    L_u = atan2f(((kalman_airspeed_U.w_b - Q_tmp_0) - Q_tmp_tmp) - Q_tmp_1,
+                 (real32_T)((real_T)(-f1_idx_7)));
+    f1_idx_5 = f1_idx_7 * f1_idx_7;
+    f1_idx_6 = f1_idx_5 + (h1_idx_1 * h1_idx_1);
+    f1_idx_4 = f1_idx_6 + (h1_idx_2 * h1_idx_2);
+    Q_tmp_tmp = (-rtb_UnitConversion) * (kalman_airspeed_DW.XDelay1_DSTATE[6] +
+      (((180.0F * kalman_airspeed_DW.XDelay1_DSTATE[7]) * L_u) / 3.14159274F));
+    Q_tmp_1 = (((180.0F * kalman_airspeed_DW.XDelay1_DSTATE[7]) *
+                rtb_UnitConversion) * ((real32_T)f1_idx_5)) * ((real32_T)
+      f1_idx_4);
     h1_idx_5_tmp = (real32_T)((real_T)(3.1415926535897931 * f1_idx_6));
     sigma_u = (((2.0F * kalman_airspeed_U.T_bn[6]) * ((real32_T)f1_idx_7)) +
                ((2.0F * kalman_airspeed_U.T_bn[7]) * ((real32_T)h1_idx_2))) +
       ((2.0F * kalman_airspeed_U.T_bn[8]) * ((real32_T)h1_idx_1));
-    cToRps_idx_1 = (real_T)((real32_T)((h1_idx_1_tmp_0 * sigma_u) -
-      ((h1_idx_1_tmp_1 * ((kalman_airspeed_U.T_bn[8] / ((real32_T)f1_idx_7)) -
-                          ((kalman_airspeed_U.T_bn[6] * ((real32_T)h1_idx_1)) /
-      ((real32_T)((real_T)(f1_idx_7 * f1_idx_7)))))) / h1_idx_5_tmp)));
-    x_hat_idx_2_tmp = (((2.0F * kalman_airspeed_U.T_bn[3]) * ((real32_T)f1_idx_7))
-                       + ((2.0F * kalman_airspeed_U.T_bn[4]) * ((real32_T)
-      h1_idx_2))) + ((2.0F * kalman_airspeed_U.T_bn[5]) * ((real32_T)h1_idx_1));
-    f1_idx_6 = (real_T)((real32_T)((h1_idx_1_tmp_0 * x_hat_idx_2_tmp) -
-      ((h1_idx_1_tmp_1 * ((kalman_airspeed_U.T_bn[5] / ((real32_T)f1_idx_7)) -
-                          ((kalman_airspeed_U.T_bn[3] * ((real32_T)h1_idx_1)) /
-      ((real32_T)((real_T)(f1_idx_7 * f1_idx_7)))))) / h1_idx_5_tmp)));
-    h1_idx_1_tmp = (((2.0F * kalman_airspeed_U.T_bn[0]) * ((real32_T)f1_idx_7))
-                    + ((2.0F * kalman_airspeed_U.T_bn[1]) * ((real32_T)h1_idx_2)))
-      + ((2.0F * kalman_airspeed_U.T_bn[2]) * ((real32_T)h1_idx_1));
-    f1_idx_7 = (real_T)((real32_T)((h1_idx_1_tmp_0 * h1_idx_1_tmp) -
-      ((h1_idx_1_tmp_1 * ((kalman_airspeed_U.T_bn[2] / ((real32_T)f1_idx_7)) -
-                          ((kalman_airspeed_U.T_bn[0] * ((real32_T)h1_idx_1)) /
-      ((real32_T)((real_T)(f1_idx_7 * f1_idx_7)))))) / h1_idx_5_tmp)));
-    h1_idx_1_tmp_0 = rtb_Delay2 * ((real32_T)Thrust_coe_idx_1);
-    h1_idx_1_tmp_1 = (real32_T)((real_T)((2.0 * ((real_T)i)) * sqrt(cToRps_idx_0)));
-    h1_idx_1 = (real_T)((real32_T)((h1_idx_1_tmp_0 * sigma_u) / h1_idx_1_tmp_1));
-    h1_idx_2 = (real_T)((real32_T)((h1_idx_1_tmp_0 * x_hat_idx_2_tmp) /
-      h1_idx_1_tmp_1));
-    h1_idx_10 = (real_T)((real32_T)((h1_idx_1_tmp_0 * h1_idx_1_tmp) /
-      h1_idx_1_tmp_1));
+    f1_idx_5 = (real_T)((real32_T)((Q_tmp_tmp * sigma_u) - ((Q_tmp_1 *
+      ((kalman_airspeed_U.T_bn[8] / ((real32_T)f1_idx_7)) -
+       ((kalman_airspeed_U.T_bn[6] * ((real32_T)h1_idx_1)) / ((real32_T)((real_T)
+      (f1_idx_7 * f1_idx_7)))))) / h1_idx_5_tmp)));
+    Q_tmp = (((2.0F * kalman_airspeed_U.T_bn[3]) * ((real32_T)f1_idx_7)) +
+             ((2.0F * kalman_airspeed_U.T_bn[4]) * ((real32_T)h1_idx_2))) +
+      ((2.0F * kalman_airspeed_U.T_bn[5]) * ((real32_T)h1_idx_1));
+    f1_idx_6 = (real_T)((real32_T)((Q_tmp_tmp * Q_tmp) - ((Q_tmp_1 *
+      ((kalman_airspeed_U.T_bn[5] / ((real32_T)f1_idx_7)) -
+       ((kalman_airspeed_U.T_bn[3] * ((real32_T)h1_idx_1)) / ((real32_T)((real_T)
+      (f1_idx_7 * f1_idx_7)))))) / h1_idx_5_tmp)));
+    Q_tmp_0 = (((2.0F * kalman_airspeed_U.T_bn[0]) * ((real32_T)f1_idx_7)) +
+               ((2.0F * kalman_airspeed_U.T_bn[1]) * ((real32_T)h1_idx_2))) +
+      ((2.0F * kalman_airspeed_U.T_bn[2]) * ((real32_T)h1_idx_1));
+    f1_idx_7 = (real_T)((real32_T)((Q_tmp_tmp * Q_tmp_0) - ((Q_tmp_1 *
+      ((kalman_airspeed_U.T_bn[2] / ((real32_T)f1_idx_7)) -
+       ((kalman_airspeed_U.T_bn[0] * ((real32_T)h1_idx_1)) / ((real32_T)((real_T)
+      (f1_idx_7 * f1_idx_7)))))) / h1_idx_5_tmp)));
+    Q_tmp_tmp = RPS * ((real32_T)Thrust_coe_idx_1);
+    Q_tmp_1 = (2.0F * kalman_airspeed_U.weight) * ((real32_T)sqrt(f1_idx_4));
+    h1_idx_1 = (real_T)((real32_T)((Q_tmp_tmp * sigma_u) / Q_tmp_1));
+    h1_idx_2 = (real_T)((real32_T)((Q_tmp_tmp * Q_tmp) / Q_tmp_1));
+    h1_idx_10 = (real_T)((real32_T)((Q_tmp_tmp * Q_tmp_0) / Q_tmp_1));
     H[0] = (real32_T)f1_idx_7;
     H[2] = (real32_T)f1_idx_6;
-    H[4] = (real32_T)cToRps_idx_1;
+    H[4] = (real32_T)f1_idx_5;
     H[6] = (real32_T)f1_idx_7;
     H[8] = (real32_T)f1_idx_6;
-    H[10] = (real32_T)cToRps_idx_1;
-    H[12] = (-rtb_UnitConversion) * ((real32_T)cToRps_idx_0);
-    H[14] = (-(((180.0F * rtb_UnitConversion) * ((real32_T)cToRps_idx_0)) * L_u))
-      / 3.14159274F;
+    H[10] = (real32_T)f1_idx_5;
+    H[12] = (-rtb_UnitConversion) * ((real32_T)f1_idx_4);
+    H[14] = (-(((180.0F * rtb_UnitConversion) * ((real32_T)f1_idx_4)) * L_u)) /
+      3.14159274F;
     H[16] = 0.0F;
     H[1] = (real32_T)h1_idx_10;
     H[3] = (real32_T)h1_idx_2;
@@ -493,53 +497,52 @@ void kalman_airspeedModelClass::step()
     H[13] = 0.0F;
     H[15] = 0.0F;
     H[17] = 0.0F;
-    for (i_0 = 0; i_0 < 9; i_0++) {
+    for (i = 0; i < 9; i++) {
       for (r1 = 0; r1 < 9; r1++) {
-        r2 = i_0 + (9 * r1);
+        r2 = i + (9 * r1);
         F_0[r2] = 0.0F;
         for (P_hat_tmp = 0; P_hat_tmp < 9; P_hat_tmp++) {
-          F_0[r2] += F[i_0 + (9 * P_hat_tmp)] *
+          F_0[r2] += F[i + (9 * P_hat_tmp)] *
             kalman_airspeed_DW.PDelay_DSTATE[P_hat_tmp + (9 * r1)];
         }
       }
 
       for (r1 = 0; r1 < 9; r1++) {
-        L_u = F_0[i_0] * F[r1];
+        L_u = F_0[i] * F[r1];
         for (P_hat_tmp = 0; P_hat_tmp < 8; P_hat_tmp++) {
-          L_u += F_0[i_0 + (9 * (P_hat_tmp + 1))] * F[r1 + (9 * (P_hat_tmp + 1))];
+          L_u += F_0[i + (9 * (P_hat_tmp + 1))] * F[r1 + (9 * (P_hat_tmp + 1))];
         }
 
-        P_hat_tmp = i_0 + (9 * r1);
+        P_hat_tmp = i + (9 * r1);
         P_hat[P_hat_tmp] = L_u + ((real32_T)Q[P_hat_tmp]);
       }
     }
 
-    for (i_0 = 0; i_0 < 2; i_0++) {
+    for (i = 0; i < 2; i++) {
       for (r1 = 0; r1 < 9; r1++) {
-        Kgain[i_0 + (r1 * 2)] = 0.0F;
+        Kgain[i + (r1 * 2)] = 0.0F;
         for (P_hat_tmp = 0; P_hat_tmp < 9; P_hat_tmp++) {
-          Kgain[i_0 + (r1 * 2)] += H[i_0 + (P_hat_tmp * 2)] * P_hat[P_hat_tmp +
-            (9 * r1)];
+          Kgain[i + (r1 * 2)] += H[i + (P_hat_tmp * 2)] * P_hat[P_hat_tmp + (9 *
+            r1)];
         }
       }
 
       for (r1 = 0; r1 < 2; r1++) {
-        L_u = Kgain[i_0] * H[r1];
+        L_u = Kgain[i] * H[r1];
         for (P_hat_tmp = 0; P_hat_tmp < 8; P_hat_tmp++) {
-          L_u += Kgain[i_0 + ((P_hat_tmp + 1) * 2)] * H[r1 + ((P_hat_tmp + 1) *
-            2)];
+          L_u += Kgain[i + ((P_hat_tmp + 1) * 2)] * H[r1 + ((P_hat_tmp + 1) * 2)];
         }
 
-        Innov[i_0 + (r1 * 2)] = L_u + ((real32_T)R[i_0 + (r1 * 2)]);
+        Innov[i + (r1 * 2)] = L_u + ((real32_T)R[i + (r1 * 2)]);
       }
     }
 
-    for (i_0 = 0; i_0 < 9; i_0++) {
+    for (i = 0; i < 9; i++) {
       for (r1 = 0; r1 < 2; r1++) {
-        r2 = i_0 + (9 * r1);
+        r2 = i + (9 * r1);
         y[r2] = 0.0F;
         for (P_hat_tmp = 0; P_hat_tmp < 9; P_hat_tmp++) {
-          y[r2] += P_hat[i_0 + (9 * P_hat_tmp)] * H[r1 + (P_hat_tmp * 2)];
+          y[r2] += P_hat[i + (9 * P_hat_tmp)] * H[r1 + (P_hat_tmp * 2)];
         }
       }
     }
@@ -554,57 +557,48 @@ void kalman_airspeedModelClass::step()
 
     L_u = Innov[r2] / Innov[r1];
     sigma_u = Innov[2 + r2] - (L_u * Innov[2 + r1]);
-    for (i_0 = 0; i_0 < 9; i_0++) {
-      P_hat_tmp = i_0 + (9 * r1);
-      Kgain[P_hat_tmp] = y[i_0] / Innov[r1];
-      Kgain_tmp = i_0 + (9 * r2);
-      Kgain[Kgain_tmp] = (y[9 + i_0] - (Kgain[P_hat_tmp] * Innov[2 + r1])) /
+    for (i = 0; i < 9; i++) {
+      P_hat_tmp = i + (9 * r1);
+      Kgain[P_hat_tmp] = y[i] / Innov[r1];
+      Kgain_tmp = i + (9 * r2);
+      Kgain[Kgain_tmp] = (y[9 + i] - (Kgain[P_hat_tmp] * Innov[2 + r1])) /
         sigma_u;
-      Kgain[P_hat_tmp] = Kgain[i_0 + (9 * r1)] - (Kgain[Kgain_tmp] * L_u);
+      Kgain[P_hat_tmp] = Kgain[i + (9 * r1)] - (Kgain[Kgain_tmp] * L_u);
     }
 
     Vbar_a = kalman_airspeed_U.Az - (((-rtb_UnitConversion) * (Vbar_a * Vbar_a))
       * (kalman_airspeed_DW.XDelay1_DSTATE[6] +
          (kalman_airspeed_DW.XDelay1_DSTATE[7] * (57.2957802F * atan2f(V_rb[2],
       V_rb[0])))));
-    V_a = kalman_airspeed_U.Ax - ((((((real32_T)Thrust_coe_idx_0) * (rtb_Delay2 *
-      rtb_Delay2)) + ((((real32_T)Thrust_coe_idx_1) * rtb_Delay2) * V_a)) /
-      ((real32_T)i)) + ((((kalman_airspeed_U.rho * (V_a * V_a)) * ((real32_T)
-      S_ref)) * ((real32_T)CD_mean)) / dt2));
-    for (i_0 = 0; i_0 < 9; i_0++) {
-      // Outport: '<Root>/x_hat' incorporates:
-      //   MATLAB Function: '<S4>/FunctionOfModule'
-
-      kalman_airspeed_Y.x_hat[i_0] = x_hat[i_0] + ((Kgain[i_0] * Vbar_a) +
-        (Kgain[i_0 + 9] * V_a));
-
-      // MATLAB Function: '<S4>/FunctionOfModule'
+    dt2 = kalman_airspeed_U.Ax - ((((((real32_T)Thrust_coe_idx_0) * (RPS * RPS))
+      + ((((real32_T)Thrust_coe_idx_1) * RPS) * dt2)) / kalman_airspeed_U.weight)
+      + ((((kalman_airspeed_U.rho * (dt2 * dt2)) * ((real32_T)S_ref)) *
+          ((real32_T)CD_mean)) / (2.0F * kalman_airspeed_U.weight)));
+    for (i = 0; i < 9; i++) {
+      kalman_airspeed_DW.x_hat_new[i] = x_hat[i] + ((Kgain[i] * Vbar_a) +
+        (Kgain[i + 9] * dt2));
       for (r1 = 0; r1 < 9; r1++) {
-        P_hat_tmp = i_0 + (9 * r1);
+        P_hat_tmp = i + (9 * r1);
         F[P_hat_tmp] = 0.0F;
-        F[P_hat_tmp] += Kgain[i_0] * H[r1 * 2];
-        F[P_hat_tmp] = F[i_0 + (9 * r1)] + (Kgain[i_0 + 9] * H[1 + (r1 * 2)]);
+        F[P_hat_tmp] += Kgain[i] * H[r1 * 2];
+        F[P_hat_tmp] = F[i + (9 * r1)] + (Kgain[i + 9] * H[1 + (r1 * 2)]);
       }
 
+      // Outport: '<Root>/P_hat'
       for (r1 = 0; r1 < 9; r1++) {
-        // Outport: '<Root>/P_hat' incorporates:
-        //   MATLAB Function: '<S4>/FunctionOfModule'
-
-        L_u = F[i_0] * P_hat[9 * r1];
+        L_u = F[i] * P_hat[9 * r1];
         for (P_hat_tmp = 0; P_hat_tmp < 8; P_hat_tmp++) {
-          L_u += F[i_0 + (9 * (P_hat_tmp + 1))] * P_hat[(P_hat_tmp + (9 * r1)) +
-            1];
+          L_u += F[i + (9 * (P_hat_tmp + 1))] * P_hat[(P_hat_tmp + (9 * r1)) + 1];
         }
 
-        // MATLAB Function: '<S4>/FunctionOfModule'
-        P_hat_tmp = i_0 + (9 * r1);
-
-        // Outport: '<Root>/P_hat' incorporates:
-        //   MATLAB Function: '<S4>/FunctionOfModule'
-
+        P_hat_tmp = i + (9 * r1);
         kalman_airspeed_Y.P_hat[P_hat_tmp] = P_hat[P_hat_tmp] - L_u;
       }
+
+      // End of Outport: '<Root>/P_hat'
     }
+
+    // End of MATLAB Function: '<S6>/airspeedSynthetic_heightCalibrateRPSAndModelVarianceVarient' 
   } else {
     if (kalman_airspeed_DW.Subsystem_MODE) {
       kalman_airspeed_DW.Subsystem_MODE = false;
@@ -614,22 +608,17 @@ void kalman_airspeedModelClass::step()
   // End of Logic: '<S1>/Logical Operator1'
   // End of Outputs for SubSystem: '<S1>/Subsystem'
 
-  // Sum: '<S3>/Sum of Elements2' incorporates:
-  //   Outport: '<Root>/x_hat'
+  // Sum: '<S5>/Sum of Elements2'
+  rtb_UnitConversion = kalman_airspeed_DW.x_hat_new[0] +
+    kalman_airspeed_DW.x_hat_new[3];
 
-  rtb_Delay2 = kalman_airspeed_Y.x_hat[0] + kalman_airspeed_Y.x_hat[3];
+  // Sum: '<S5>/Sum of Elements1'
+  RPS = kalman_airspeed_DW.x_hat_new[1] + kalman_airspeed_DW.x_hat_new[4];
 
-  // Sum: '<S3>/Sum of Elements1' incorporates:
-  //   Outport: '<Root>/x_hat'
+  // Sum: '<S5>/Sum of Elements3'
+  Vbar_a = kalman_airspeed_DW.x_hat_new[2] + kalman_airspeed_DW.x_hat_new[5];
 
-  rtb_UnitConversion = kalman_airspeed_Y.x_hat[1] + kalman_airspeed_Y.x_hat[4];
-
-  // Sum: '<S3>/Sum of Elements3' incorporates:
-  //   Outport: '<Root>/x_hat'
-
-  Vbar_a = kalman_airspeed_Y.x_hat[2] + kalman_airspeed_Y.x_hat[5];
-
-  // Reshape: '<S3>/Reshape1' incorporates:
+  // Reshape: '<S5>/Reshape1' incorporates:
   //   Inport: '<Root>/u_b'
   //   Inport: '<Root>/v_b'
   //   Inport: '<Root>/w_b'
@@ -638,26 +627,169 @@ void kalman_airspeedModelClass::step()
   tmp[1] = kalman_airspeed_U.v_b;
   tmp[2] = kalman_airspeed_U.w_b;
 
-  // Sum: '<S3>/Vb-Wb' incorporates:
+  // Sum: '<S5>/Vb-Wb' incorporates:
   //   Inport: '<Root>/T_bn'
-  //   Product: '<S3>/Product'
-  //   Reshape: '<S3>/Reshape'
+  //   Product: '<S5>/Product'
+  //   Reshape: '<S5>/Reshape'
 
-  for (i_0 = 0; i_0 < 3; i_0++) {
-    V_rb[i_0] = tmp[i_0] - (((kalman_airspeed_U.T_bn[i_0] * rtb_Delay2) +
-      (kalman_airspeed_U.T_bn[i_0 + 3] * rtb_UnitConversion)) +
-      (kalman_airspeed_U.T_bn[i_0 + 6] * Vbar_a));
+  for (i = 0; i < 3; i++) {
+    V_rb[i] = tmp[i] - (((kalman_airspeed_U.T_bn[i] * rtb_UnitConversion) +
+                         (kalman_airspeed_U.T_bn[i + 3] * RPS)) +
+                        (kalman_airspeed_U.T_bn[i + 6] * Vbar_a));
   }
 
-  // End of Sum: '<S3>/Vb-Wb'
+  // End of Sum: '<S5>/Vb-Wb'
 
-  // Outport: '<Root>/IAS_hat'
-  kalman_airspeed_Y.IAS_hat = V_rb[0];
+  // Saturate: '<S1>/IAS_hat saturation'
+  if (V_rb[0] > 80.0F) {
+    // Outport: '<Root>/IAS_hat'
+    kalman_airspeed_Y.IAS_hat = 80.0F;
+  } else if (V_rb[0] < (-80.0F)) {
+    // Outport: '<Root>/IAS_hat'
+    kalman_airspeed_Y.IAS_hat = (-80.0F);
+  } else {
+    // Outport: '<Root>/IAS_hat'
+    kalman_airspeed_Y.IAS_hat = V_rb[0];
+  }
+
+  // End of Saturate: '<S1>/IAS_hat saturation'
 
   // Outport: '<Root>/valid' incorporates:
+  //   Constant: '<S3>/Constant'
+  //   Constant: '<S4>/Constant'
   //   Logic: '<S1>/Logical Operator'
+  //   Logic: '<S1>/Logical Operator2'
+  //   RelationalOperator: '<S3>/Compare'
+  //   RelationalOperator: '<S4>/Compare'
 
-  kalman_airspeed_Y.valid = !kalman_airspeed_DW.InitParam;
+  kalman_airspeed_Y.valid = (((V_rb[0] > (-80.0F)) && (V_rb[0] < 80.0F)) &&
+    (!kalman_airspeed_DW.InitParam));
+
+  // Saturate: '<S1>/u_sn saturation'
+  if (kalman_airspeed_DW.x_hat_new[0] > 30.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[0] = 30.0F;
+  } else if (kalman_airspeed_DW.x_hat_new[0] < (-30.0F)) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[0] = (-30.0F);
+  } else {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[0] = kalman_airspeed_DW.x_hat_new[0];
+  }
+
+  // End of Saturate: '<S1>/u_sn saturation'
+
+  // Saturate: '<S1>/v_sn saturation'
+  if (kalman_airspeed_DW.x_hat_new[1] > 30.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[1] = 30.0F;
+  } else if (kalman_airspeed_DW.x_hat_new[1] < (-30.0F)) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[1] = (-30.0F);
+  } else {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[1] = kalman_airspeed_DW.x_hat_new[1];
+  }
+
+  // End of Saturate: '<S1>/v_sn saturation'
+
+  // Saturate: '<S1>/w_sn saturation'
+  if (kalman_airspeed_DW.x_hat_new[2] > 30.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[2] = 30.0F;
+  } else if (kalman_airspeed_DW.x_hat_new[2] < (-30.0F)) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[2] = (-30.0F);
+  } else {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[2] = kalman_airspeed_DW.x_hat_new[2];
+  }
+
+  // End of Saturate: '<S1>/w_sn saturation'
+
+  // Saturate: '<S1>/u_tn saturation'
+  if (kalman_airspeed_DW.x_hat_new[3] > 30.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[3] = 30.0F;
+  } else if (kalman_airspeed_DW.x_hat_new[3] < (-30.0F)) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[3] = (-30.0F);
+  } else {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[3] = kalman_airspeed_DW.x_hat_new[3];
+  }
+
+  // End of Saturate: '<S1>/u_tn saturation'
+
+  // Saturate: '<S1>/v_tn saturation'
+  if (kalman_airspeed_DW.x_hat_new[4] > 30.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[4] = 30.0F;
+  } else if (kalman_airspeed_DW.x_hat_new[4] < (-30.0F)) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[4] = (-30.0F);
+  } else {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[4] = kalman_airspeed_DW.x_hat_new[4];
+  }
+
+  // End of Saturate: '<S1>/v_tn saturation'
+
+  // Saturate: '<S1>/w_tn saturation'
+  if (kalman_airspeed_DW.x_hat_new[5] > 30.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[5] = 30.0F;
+  } else if (kalman_airspeed_DW.x_hat_new[5] < (-30.0F)) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[5] = (-30.0F);
+  } else {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[5] = kalman_airspeed_DW.x_hat_new[5];
+  }
+
+  // End of Saturate: '<S1>/w_tn saturation'
+
+  // Saturate: '<S1>/CL0'
+  if (kalman_airspeed_DW.x_hat_new[6] > 2.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[6] = 2.0F;
+  } else if (kalman_airspeed_DW.x_hat_new[6] < 0.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[6] = 0.0F;
+  } else {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[6] = kalman_airspeed_DW.x_hat_new[6];
+  }
+
+  // End of Saturate: '<S1>/CL0'
+
+  // Saturate: '<S1>/CL_alpha'
+  if (kalman_airspeed_DW.x_hat_new[7] > 2.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[7] = 2.0F;
+  } else if (kalman_airspeed_DW.x_hat_new[7] < (-2.0F)) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[7] = (-2.0F);
+  } else {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[7] = kalman_airspeed_DW.x_hat_new[7];
+  }
+
+  // End of Saturate: '<S1>/CL_alpha'
+
+  // Saturate: '<S1>/r'
+  if (kalman_airspeed_DW.x_hat_new[8] > 3.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[8] = 3.0F;
+  } else if (kalman_airspeed_DW.x_hat_new[8] < 0.0F) {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[8] = 0.0F;
+  } else {
+    // Outport: '<Root>/x_hat'
+    kalman_airspeed_Y.x_hat[8] = kalman_airspeed_DW.x_hat_new[8];
+  }
+
+  // End of Saturate: '<S1>/r'
 
   // Update for Delay: '<S1>/Delay2'
   kalman_airspeed_DW.Delay2_DSTATE = V_rb[0];
@@ -668,11 +800,9 @@ void kalman_airspeedModelClass::step()
   memcpy(&kalman_airspeed_DW.PDelay_DSTATE[0], &kalman_airspeed_Y.P_hat[0], 81U *
          (sizeof(real32_T)));
 
-  // Update for Delay: '<S1>/X Delay1' incorporates:
-  //   Outport: '<Root>/x_hat'
-
+  // Update for Delay: '<S1>/X Delay1'
   for (i = 0; i < 9; i++) {
-    kalman_airspeed_DW.XDelay1_DSTATE[i] = kalman_airspeed_Y.x_hat[i];
+    kalman_airspeed_DW.XDelay1_DSTATE[i] = kalman_airspeed_DW.x_hat_new[i];
   }
 
   // End of Update for Delay: '<S1>/X Delay1'
@@ -713,8 +843,8 @@ void kalman_airspeedModelClass::initialize()
     // End of InitializeConditions for Delay: '<S1>/X Delay1'
 
     // SystemInitialize for Chart: '<S1>/Chart'
-    kalman_airspeed_DW.is_active_c1_AirspeedSyntheticI = 0U;
-    kalman_airspeed_DW.is_c1_AirspeedSyntheticImprove =
+    kalman_airspeed_DW.is_active_c2_AirspeedSyntheticI = 0U;
+    kalman_airspeed_DW.is_c2_AirspeedSyntheticImprove =
       kalman_airsp_IN_NO_ACTIVE_CHILD;
   }
 }

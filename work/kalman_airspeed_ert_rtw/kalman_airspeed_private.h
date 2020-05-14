@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'kalman_airspeed'.
 //
-// Model version                  : 1.49
+// Model version                  : 1.56
 // Simulink Coder version         : 8.13 (R2017b) 24-Jul-2017
-// C/C++ source code generated on : Thu Mar 19 11:39:42 2020
+// C/C++ source code generated on : Mon May 11 09:28:48 2020
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex
